@@ -1,12 +1,46 @@
 namespace AngleSharp.Core.Tests.Css
 {
+    using AngleSharp.Css;
+    using AngleSharp.Css.Dom;
     using AngleSharp.Dom;
     using AngleSharp.Html.Dom;
     using NUnit.Framework;
+    using System;
+    using System.Linq;
 
     [TestFixture]
     public class CssW3CSelectorTests
     {
+
+        [Test]
+        public void CustomTest()
+        {
+
+            var source = @"<p xmlns=""http://www.w3.org/1999/xhtml"">
+<input type=""checkbox"" checked=""checked""></input> <span>Everything in this paragraph should have a green background</span></p>";
+
+            var config = Configuration.Default;
+            var doc = source.ToHtmlDocument(config);
+            var pseudoFactory = config.Services.OfType<DefaultPseudoClassSelectorFactory>().Single();
+            pseudoFactory.Register("customflag", new CustomSelector());
+
+            var selector1 = doc.Body.QuerySelectorAll("input:customflag");
+        }
+
+        sealed class CustomSelector : ISelector
+        {
+            public Priority Specificity => Priority.OneClass;
+
+            public String Text => PseudoClassNames.Separator + "customflag";
+
+            public void Accept(ISelectorVisitor visitor) { }
+
+            public Boolean Match(IElement element, IElement scope) => true;
+        }
+
+
+
+
         #region Already included tests
 
         /// <summary>
